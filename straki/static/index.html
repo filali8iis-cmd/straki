@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>STRAKI – Strategy board game</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="icon" href="/logo.png" />
+</head>
+<body>
+  <div class="app">
+    <header class="hero">
+      <img class="logo" src="/logo.png" alt="STRAKI" />
+      <p class="tagline">Strategisches Brettspiel nach den Regeln von <a href="https://straki.org" target="_blank" rel="noreferrer">straki.org</a></p>
+    </header>
+
+    <main class="layout">
+      <section class="board-wrap">
+        <div class="rank-labels" id="ranks"></div>
+        <div>
+          <div id="board" class="board" role="grid" aria-label="STRAKI-Spielbrett"></div>
+          <div class="file-labels" id="files"></div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <p id="status" class="status">Rot beginnt.</p>
+        <div id="check-banner" class="check" hidden>Angriff auf Figur 5</div>
+
+        <div class="legend">
+          <span><i class="dot k1"></i>1 Soldat</span>
+          <span><i class="dot k2"></i>2 Frosch</span>
+          <span><i class="dot k3"></i>3 Leuchtturm</span>
+          <span><i class="dot k4"></i>4 Schere</span>
+          <span><i class="dot k5"></i>5 Großer Leuchtturm</span>
+          <span><i class="dot kB"></i>B Schild</span>
+          <span><i class="dot kA"></i>A Speer</span>
+        </div>
+
+        <div class="actions">
+          <div id="rotations" class="rotations" hidden>
+            <span>Rotieren</span>
+            <button data-dir="N">↑</button>
+            <button data-dir="E">→</button>
+            <button data-dir="S">↓</button>
+            <button data-dir="W">←</button>
+          </div>
+          <button id="half" class="btn ghost" hidden>0,5 Punkte nehmen</button>
+          <button id="new-game" class="btn">Neue Partie</button>
+          <label class="toggle">
+            <input id="vs-ai" type="checkbox" />
+            Gegen den Computer
+          </label>
+        </div>
+
+        <details class="rules" open>
+          <summary>Ziel und Regeln</summary>
+          <p>Gewinne durch <strong>Nullus motus</strong>: greife die gegnerische Figur 5 so an, dass sie weder fliehen noch sich verteidigen kann.</p>
+          <p>Ziehen und Schlagen sind getrennt. Figur 3 und 5 können rotieren und fusionieren. Figur B schützt drei Felder vor sich; nur der Speer (A) durchbricht den Schutz.</p>
+          <p>Vollständige Regeln: <a href="https://straki.org/spielregeln/" target="_blank" rel="noreferrer">straki.org/spielregeln</a></p>
+        </details>
+      </aside>
+    </main>
+  </div>
+  <script src="/game.js"></script>
+</body>
+</html>
