@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pygame
 
 from straki.ai import choose_turn
@@ -26,8 +24,9 @@ from straki.layout import (
     rank_label_center,
 )
 from straki.models import Direction, Piece, PieceKind, Player
+from straki.paths import static_dir
 
-STATIC_DIR = Path(__file__).resolve().parent / "static"
+STATIC_DIR = static_dir()
 
 WHITE = (255, 255, 255)
 BG = (244, 241, 234)
@@ -91,6 +90,8 @@ def run_gui(vs_ai: bool = False) -> None:
     clock = pygame.time.Clock()
     fonts = _load_fonts()
     logo = _load_logo()
+    if logo is not None:
+        pygame.display.set_icon(logo)
     game = Game(vs_ai=vs_ai)
     buttons = _make_buttons()
     show_rules = False

@@ -5,6 +5,7 @@ import unittest
 
 from straki.game import Game
 from straki.layout import cell_center, pixel_to_square
+from straki.paths import static_dir
 
 
 class GuiSmokeTests(unittest.TestCase):
@@ -14,6 +15,9 @@ class GuiSmokeTests(unittest.TestCase):
         self.assertEqual(square, (8, 3))
         self.assertTrue(game.click(*square))
         self.assertEqual(game.selected, (8, 3))
+
+    def test_logo_is_bundled_in_static_dir(self) -> None:
+        self.assertTrue((static_dir() / "logo.png").is_file())
 
     def test_pygame_can_draw_one_frame(self) -> None:
         os.environ.setdefault("SDL_VIDEODRIVER", "dummy")

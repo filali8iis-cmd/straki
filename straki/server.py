@@ -10,8 +10,9 @@ from urllib.parse import urlparse
 from straki.ai import choose_turn
 from straki.constants import RULES_DE
 from straki.game import Game
+from straki.paths import static_dir
 
-STATIC_DIR = Path(__file__).resolve().parent / "static"
+STATIC_DIR = static_dir()
 _lock = threading.Lock()
 _game = Game()
 
