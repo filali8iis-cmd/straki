@@ -62,10 +62,11 @@ class Game:
     def claim_half_win(self) -> bool:
         if self.winner is not None:
             return False
-        if not self.both_spears_captured(self.turn):
-            return False
-        self._set_winner(self.turn, "half", 0.5)
-        return True
+        for player in (Player.RED, Player.BLACK):
+            if self.both_spears_captured(player):
+                self._set_winner(player, "half", 0.5)
+                return True
+        return False
 
     def play_text(self, start: str, end: str | None = None) -> bool:
         s_row, s_col = parse_square(start)
@@ -251,7 +252,11 @@ class Game:
             "message": self.message,
             "check": self.check,
             "lastMove": self.last_move,
-            "canClaimHalf": self.winner is None and self.both_spears_captured(self.turn),
+            "canClaimHalf": self.winner is None
+            and (
+                self.both_spears_captured(Player.RED)
+                or self.both_spears_captured(Player.BLACK)
+            ),
             "captured": {
                 Player.RED.value: self.captured[Player.RED],
                 Player.BLACK.value: self.captured[Player.BLACK],

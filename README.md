@@ -6,20 +6,20 @@ Zwei Spieler bewegen abwechselnd Figuren auf einem **11×11-Brett**. Ziel ist **
 
 ## Start
 
-Es wird nur Python 3.10+ benötigt.
-
 ```bash
+pip install -r requirements.txt
 python3 -m straki
 ```
 
-Das öffnet die Partie im Browser unter [http://127.0.0.1:8765](http://127.0.0.1:8765).
+Das öffnet ein **eigenes Spielfenster** (pygame): Brett, Figuren, Klicks, Rotation und Computergegner.
 
 ```bash
-python3 -m straki --ai                 # gegen den Computer (Schwarz)
-python3 -m straki --console            # im Terminal
-python3 -m straki --console --ai
-python3 -m straki --port 9000 --no-browser
+python3 -m straki --ai          # gegen den Computer (Schwarz)
+python3 -m straki --console     # nur Terminal
+python3 -m straki --web         # optional im Browser
 ```
+
+Steuerung im Fenster: Figur anklicken, Ziel anklicken. Figuren 3 und 5 lassen sich über die Pfeil-Buttons rotieren. Esc beendet, bzw. schließt die Regeln.
 
 ## Regeln in Kürze
 
