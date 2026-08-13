@@ -1,0 +1,175 @@
+from __future__ import annotations
+
+import unittest
+
+from straki.board import Board, parse_square
+from straki.game import Game
+from straki.models import Direction, Piece, PieceKind, Player
+from straki.moves import (
+    attack_destinations,
+    fusion_partner,
+    protected_squares,
+    quiet_destinations,
+    shield_is_encircled,
+)
+
+
+def place(game: Game, square: str, player: Player, kind: PieceKind, facing: Direction | None = None) -> None:
+    row, col = parse_square(square)
+    game.board.set(row, col, Piece(player, kind, facing))
+
+
+def kings(game: Game) -> None:
+    place(game, "K1", Player.RED, PieceKind.BIG, Direction.S)
+    place(game, "A11", Player.BLACK, PieceKind.BIG, Direction.N)
+
+
+class RulesTests(unittest.TestCase):
+    def test_opening_soldier_moves(self) -> None:
+        game = Game()
+        game.click(*parse_square("I5"))
+        dests = {move.end for move in game.moves_for_selected() if move.rotate_to is None}
+        self.assertIn(parse_square("H5"), dests)
+        self.assertIn(parse_square("H4"), dests)
+        self.assertNotIn(parse_square("J5"), dests)
+
+    def test_scissors_moves_only_orthogonally(self) -> None:
+        game = Game(setup=False)
+        game.turn = Player.RED
+        kings(game)
+        place(game, "F6", Player.RED, PieceKind.SCISSORS)
+        game.click(*parse_square("F6"))
+        quiet = {move.end for move in game.moves_for_selected() if not move.capture}
+        self.assertEqual(
+            quiet,
+            {parse_square("G6"), parse_square("E6"), parse_square("F5"), parse_square("F7")},
+        )
+
+    def test_scissors_attacks_four_diagonally(self) -> None:
+        game = Game(setup=False)
+        game.turn = Player.RED
+        place(game, "F6", Player.RED, PieceKind.SCISSORS)
+        place(game, "B2", Player.BLACK, PieceKind.SOLDIER)
+        attacks = attack_destinations(game.board, *parse_square("F6"))
+        self.assertIn(parse_square("B2"), attacks)
+        place(game, "A1", Player.BLACK, PieceKind.SOLDIER)
+        attacks = attack_destinations(game.board, *parse_square("F6"))
+        self.assertNotIn(parse_square("A1"), attacks)
+
+    def test_frog_leaps_two_diagonally(self) -> None:
+        game = Game(setup=False)
+        game.turn = Player.RED
+        place(game, "E7", Player.RED, PieceKind.FROG)
+        place(game, "G5", Player.BLACK, PieceKind.SOLDIER)
+        attacks = attack_destinations(game.board, *parse_square("E7"))
+        self.assertEqual(attacks, [parse_square("G5")])
+
+    def test_small_lighthouse_attacks_three_orthogonal(self) -> None:
+        game = Game(setup=False)
+        place(game, "G5", Player.RED, PieceKind.SMALL, Direction.S)
+        place(game, "G8", Player.BLACK, PieceKind.SOLDIER)
+        place(game, "G9", Player.BLACK, PieceKind.SOLDIER)
+        attacks = attack_destinations(game.board, *parse_square("G5"))
+        self.assertIn(parse_square("G8"), attacks)
+        self.assertNotIn(parse_square("G9"), attacks)
+
+    def test_big_lighthouse_attacks_like_rook(self) -> None:
+        game = Game(setup=False)
+        place(game, "F6", Player.RED, PieceKind.BIG, Direction.S)
+        place(game, "F2", Player.BLACK, PieceKind.SOLDIER)
+        attacks = attack_destinations(game.board, *parse_square("F6"))
+        self.assertIn(parse_square("F2"), attacks)
+
+    def test_soldier_captures_only_forward(self) -> None:
+        game = Game(setup=False)
+        game.turn = Player.BLACK
+        place(game, "D5", Player.BLACK, PieceKind.SOLDIER)
+        place(game, "E5", Player.RED, PieceKind.FROG)
+        place(game, "D6", Player.RED, PieceKind.FROG)
+        attacks = attack_destinations(game.board, *parse_square("D5"))
+        self.assertEqual(attacks, [parse_square("E5")])
+
+    def test_shield_protects_three_squares_ahead(self) -> None:
+        game = Game(setup=False)
+        place(game, "I6", Player.RED, PieceKind.SHIELD)
+        protected = protected_squares(game.board, *parse_square("I6"))
+        self.assertEqual(
+            protected,
+            {parse_square("H5"), parse_square("H6"), parse_square("H7")},
+        )
+
+    def test_shield_blocks_scissors_but_not_spear(self) -> None:
+        game = Game(setup=False)
+        game.turn = Player.BLACK
+        place(game, "I6", Player.RED, PieceKind.SHIELD)
+        place(game, "H6", Player.RED, PieceKind.SMALL, Direction.S)
+        place(game, "E9", Player.BLACK, PieceKind.SCISSORS)
+        place(game, "G6", Player.BLACK, PieceKind.SPEAR)
+        game.board.set(*parse_square("J6"), Piece(Player.RED, PieceKind.BIG, Direction.S))
+        game.board.set(*parse_square("B6"), Piece(Player.BLACK, PieceKind.BIG, Direction.N))
+        game.click(*parse_square("E9"))
+        dests = {move.end for move in game.moves_for_selected() if move.capture}
+        self.assertNotIn(parse_square("H6"), dests)
+        game.selected = None
+        game.click(*parse_square("G6"))
+        spear_caps = {move.end for move in game.moves_for_selected() if move.capture}
+        self.assertIn(parse_square("H6"), spear_caps)
+
+    def test_only_spear_can_capture_shield(self) -> None:
+        game = Game(setup=False)
+        game.turn = Player.BLACK
+        place(game, "F5", Player.RED, PieceKind.SHIELD)
+        place(game, "E5", Player.BLACK, PieceKind.SOLDIER)
+        place(game, "E6", Player.BLACK, PieceKind.SPEAR)
+        kings(game)
+        game.click(*parse_square("E5"))
+        self.assertNotIn(parse_square("F5"), {m.end for m in game.moves_for_selected()})
+        game.click(*parse_square("E6"))
+        self.assertIn(parse_square("F5"), {m.end for m in game.moves_for_selected() if m.capture})
+
+    def test_cannot_capture_figur_5(self) -> None:
+        game = Game(setup=False)
+        game.turn = Player.RED
+        place(game, "E5", Player.RED, PieceKind.SPEAR)
+        place(game, "E6", Player.BLACK, PieceKind.BIG, Direction.N)
+        place(game, "J6", Player.RED, PieceKind.BIG, Direction.S)
+        attacks = attack_destinations(game.board, *parse_square("E5"))
+        self.assertIn(parse_square("E6"), attacks)
+        game.click(*parse_square("E5"))
+        self.assertNotIn(parse_square("E6"), {m.end for m in game.moves_for_selected()})
+
+    def test_fusion_extends_small_lighthouse(self) -> None:
+        game = Game(setup=False)
+        place(game, "E3", Player.RED, PieceKind.SMALL, Direction.E)
+        place(game, "E2", Player.RED, PieceKind.BIG, Direction.E)
+        place(game, "E11", Player.BLACK, PieceKind.SOLDIER)
+        partner = fusion_partner(game.board, *parse_square("E3"), game.board.get(*parse_square("E3")))
+        self.assertIsNotNone(partner)
+        attacks = attack_destinations(game.board, *parse_square("E3"))
+        self.assertIn(parse_square("E11"), attacks)
+
+    def test_encircled_shield_is_removed(self) -> None:
+        game = Game(setup=False)
+        game.turn = Player.RED
+        place(game, "F5", Player.BLACK, PieceKind.SHIELD)
+        game.board.get(*parse_square("F5")).facing = Direction.S
+        for square in ("E4", "D4", "D5", "D6", "E6"):
+            place(game, square, Player.RED, PieceKind.SOLDIER)
+        place(game, "C1", Player.RED, PieceKind.SOLDIER)
+        place(game, "C2", Player.BLACK, PieceKind.SOLDIER)
+        place(game, "J6", Player.RED, PieceKind.BIG, Direction.S)
+        place(game, "B6", Player.BLACK, PieceKind.BIG, Direction.N)
+        self.assertTrue(shield_is_encircled(game.board, *parse_square("F5")))
+        game.click(*parse_square("C1"))
+        game.click(*parse_square("B1"))
+        self.assertIsNone(game.board.get(*parse_square("F5")))
+
+    def test_quiet_destinations_blocked_by_own_piece(self) -> None:
+        board = Board()
+        dests = quiet_destinations(board, *parse_square("J6"))
+        self.assertNotIn(parse_square("J5"), dests)
+        self.assertNotIn(parse_square("J7"), dests)
+
+
+if __name__ == "__main__":
+    unittest.main()
