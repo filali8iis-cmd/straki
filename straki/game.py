@@ -116,7 +116,7 @@ class Game:
         apply_move(self.board, move)
         if captured is not None:
             self.captured[self.turn].append(captured.kind.value)
-        self._remove_encircled_shields()
+        removed_shields = self._remove_encircled_shields()
         self.last_move = {
             "from": list(move.start),
             "to": list(move.end),
@@ -131,6 +131,11 @@ class Game:
             score = 1.5 if self.both_spears_captured(self.turn) else 1.0
             reason = "perfect" if score == 1.5 else "nullus"
             self._set_winner(self.turn, reason, score)
+            if removed_shields:
+                self.message = (
+                    "Figur B wurde umkreist und aus dem Spiel entfernt. "
+                    + self.message
+                )
             return True
         self.turn = opponent
         self.check = self.in_check(self.turn)
@@ -143,6 +148,10 @@ class Game:
                     f" {self.turn.opponent.label_de} hat beide Speere geschlagen "
                     "(0,5 Punkte möglich)."
                 )
+        if removed_shields:
+            self.message = (
+                "Figur B wurde umkreist und aus dem Spiel entfernt. " + self.message
+            )
         return True
 
     def _move_to(self, row: int, col: int) -> Move | None:
@@ -208,7 +217,7 @@ class Game:
             return True
         return False
 
-    def _remove_encircled_shields(self) -> None:
+    def _remove_encircled_shields(self) -> int:
         doomed: list[tuple[int, int, Player]] = []
         for row, col, piece in self.board.pieces():
             if piece.kind is PieceKind.SHIELD and shield_is_encircled(self.board, row, col):
@@ -216,6 +225,7 @@ class Game:
         for row, col, owner in doomed:
             self.board.set(row, col, None)
             self.captured[owner.opponent].append(PieceKind.SHIELD.value)
+        return len(doomed)
 
     def _set_winner(self, player: Player, reason: str, score: float) -> None:
         self.winner = player

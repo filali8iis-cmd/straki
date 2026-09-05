@@ -64,21 +64,31 @@ class RulesTests(unittest.TestCase):
         attacks = attack_destinations(game.board, *parse_square("E7"))
         self.assertEqual(attacks, [parse_square("G5")])
 
-    def test_small_lighthouse_attacks_three_orthogonal(self) -> None:
+    def test_small_lighthouse_attacks_only_where_head_points(self) -> None:
         game = Game(setup=False)
-        place(game, "G5", Player.RED, PieceKind.SMALL, Direction.S)
-        place(game, "G8", Player.BLACK, PieceKind.SOLDIER)
+        place(game, "G6", Player.RED, PieceKind.SMALL, Direction.S)
+        place(game, "D6", Player.BLACK, PieceKind.SOLDIER)
+        place(game, "C6", Player.BLACK, PieceKind.SOLDIER)
         place(game, "G9", Player.BLACK, PieceKind.SOLDIER)
-        attacks = attack_destinations(game.board, *parse_square("G5"))
-        self.assertIn(parse_square("G8"), attacks)
-        self.assertNotIn(parse_square("G9"), attacks)
+        place(game, "J6", Player.BLACK, PieceKind.SOLDIER)
+        attacks = attack_destinations(game.board, *parse_square("G6"))
+        self.assertEqual(attacks, [parse_square("D6")])
+        quiet = set(quiet_destinations(game.board, *parse_square("G6")))
+        self.assertIn(parse_square("H6"), quiet)
+        self.assertIn(parse_square("F5"), quiet)
+        self.assertIn(parse_square("H7"), quiet)
 
-    def test_big_lighthouse_attacks_like_rook(self) -> None:
+    def test_big_lighthouse_attacks_only_where_head_points(self) -> None:
         game = Game(setup=False)
         place(game, "F6", Player.RED, PieceKind.BIG, Direction.S)
+        place(game, "B6", Player.BLACK, PieceKind.SOLDIER)
         place(game, "F2", Player.BLACK, PieceKind.SOLDIER)
+        place(game, "J6", Player.BLACK, PieceKind.SOLDIER)
         attacks = attack_destinations(game.board, *parse_square("F6"))
-        self.assertIn(parse_square("F2"), attacks)
+        self.assertEqual(attacks, [parse_square("B6")])
+        quiet = set(quiet_destinations(game.board, *parse_square("F6")))
+        self.assertIn(parse_square("G6"), quiet)
+        self.assertIn(parse_square("E5"), quiet)
 
     def test_soldier_captures_only_forward(self) -> None:
         game = Game(setup=False)
@@ -138,6 +148,25 @@ class RulesTests(unittest.TestCase):
         game.click(*parse_square("E5"))
         self.assertNotIn(parse_square("E6"), {m.end for m in game.moves_for_selected()})
 
+    def test_rotating_lighthouse_changes_attack_line(self) -> None:
+        game = Game(setup=False)
+        game.turn = Player.RED
+        place(game, "E6", Player.RED, PieceKind.SMALL, Direction.S)
+        place(game, "B6", Player.BLACK, PieceKind.SOLDIER)
+        place(game, "E9", Player.BLACK, PieceKind.SOLDIER)
+        kings(game)
+        self.assertEqual(
+            attack_destinations(game.board, *parse_square("E6")),
+            [parse_square("B6")],
+        )
+        game.click(*parse_square("E6"))
+        self.assertTrue(game.rotate("E"))
+        self.assertEqual(game.board.get(*parse_square("E6")).facing, Direction.E)
+        self.assertEqual(
+            attack_destinations(game.board, *parse_square("E6")),
+            [parse_square("E9")],
+        )
+
     def test_fusion_extends_small_lighthouse(self) -> None:
         game = Game(setup=False)
         place(game, "E3", Player.RED, PieceKind.SMALL, Direction.E)
@@ -151,8 +180,7 @@ class RulesTests(unittest.TestCase):
     def test_encircled_shield_is_removed(self) -> None:
         game = Game(setup=False)
         game.turn = Player.RED
-        place(game, "F5", Player.BLACK, PieceKind.SHIELD)
-        game.board.get(*parse_square("F5")).facing = Direction.S
+        place(game, "F5", Player.BLACK, PieceKind.SHIELD, Direction.N)
         for square in ("E4", "D4", "D5", "D6", "E6"):
             place(game, square, Player.RED, PieceKind.SOLDIER)
         place(game, "C1", Player.RED, PieceKind.SOLDIER)
@@ -163,6 +191,29 @@ class RulesTests(unittest.TestCase):
         game.click(*parse_square("C1"))
         game.click(*parse_square("B1"))
         self.assertIsNone(game.board.get(*parse_square("F5")))
+        self.assertIn("umkreist", game.message)
+
+    def test_edge_encircled_shield_is_removed(self) -> None:
+        """Beispiel 7: Figur B am Rand, U-Form schließt über den Brettrand."""
+        game = Game(setup=False)
+        game.turn = Player.RED
+        place(game, "B9", Player.BLACK, PieceKind.SHIELD, Direction.N)
+        place(game, "A8", Player.RED, PieceKind.SOLDIER)
+        place(game, "A10", Player.RED, PieceKind.SOLDIER)
+        place(game, "C1", Player.RED, PieceKind.SOLDIER)
+        place(game, "C2", Player.BLACK, PieceKind.SOLDIER)
+        kings(game)
+        self.assertTrue(shield_is_encircled(game.board, *parse_square("B9")))
+        game.click(*parse_square("C1"))
+        game.click(*parse_square("B1"))
+        self.assertIsNone(game.board.get(*parse_square("B9")))
+
+    def test_opening_shields_are_not_encircled(self) -> None:
+        game = Game()
+        self.assertFalse(shield_is_encircled(game.board, *parse_square("I6")))
+        self.assertFalse(shield_is_encircled(game.board, *parse_square("C6")))
+        self.assertEqual(game.board.get(*parse_square("I6")).facing, Direction.S)
+        self.assertEqual(game.board.get(*parse_square("C6")).facing, Direction.N)
 
     def test_quiet_destinations_blocked_by_own_piece(self) -> None:
         board = Board()

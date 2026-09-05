@@ -24,6 +24,7 @@ from straki.layout import (
     rank_label_center,
 )
 from straki.models import Direction, Piece, PieceKind, Player
+from straki.moves import protected_squares
 from straki.paths import static_dir
 
 STATIC_DIR = static_dir()
@@ -37,6 +38,7 @@ GOLD = (138, 31, 20)
 PANEL = (255, 255, 255)
 SELECT = (255, 231, 168)
 LAST = (248, 215, 212)
+PROTECT = (255, 244, 200)
 CHECK = (196, 69, 54)
 BUTTON = (196, 69, 54)
 BUTTON_HOVER = (150, 40, 32)
@@ -252,6 +254,11 @@ def _draw_board(
     moves = game.moves_for_selected()
     quiet = {m.end for m in moves if not m.capture and m.rotate_to is None}
     captures = {m.end for m in moves if m.capture}
+    protected: set[tuple[int, int]] = set()
+    if game.selected is not None:
+        chosen = game.board.get(*game.selected)
+        if chosen is not None and chosen.kind is PieceKind.SHIELD:
+            protected = protected_squares(game.board, *game.selected)
     last = None
     if game.last_move:
         last = (tuple(game.last_move["from"]), tuple(game.last_move["to"]))
@@ -263,6 +270,8 @@ def _draw_board(
             fill = WHITE
             if game.selected == (row, col):
                 fill = SELECT
+            elif (row, col) in protected:
+                fill = PROTECT
             elif last and (row, col) in last:
                 fill = LAST
             pygame.draw.rect(screen, fill, rect)

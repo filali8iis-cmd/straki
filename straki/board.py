@@ -136,6 +136,6 @@ class Board:
             self.set(back, col, Piece(player, kind, face))
         for col in range(1, 10):
             if col == 5:
-                self.set(front, col, Piece(player, PieceKind.SHIELD))
+                self.set(front, col, Piece(player, PieceKind.SHIELD, facing))
             else:
                 self.set(front, col, Piece(player, PieceKind.SOLDIER))

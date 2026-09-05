@@ -53,16 +53,16 @@ Jeder Spieler hat 18 Figuren. Rot steht oben (Reihen I/J), Schwarz unten (Reihen
 | --- | --- | --- | --- |
 | 1 | Soldat | 1 Feld in jede Richtung | 1 Feld vorwärts |
 | 2 | Frosch | 1 Feld in jede Richtung | Sprung 2 Felder diagonal |
-| 3 | Kleiner Leuchtturm | 1 Feld in jede Richtung | bis 3 Felder orthogonal |
+| 3 | Kleiner Leuchtturm | 1 Feld in jede Richtung (unabhängig vom Kopf) | nur in Blickrichtung, bis 3 Felder |
 | 4 | Schere | 1 Feld orthogonal | bis 4 Felder diagonal |
-| 5 | Großer Leuchtturm | 1 Feld in jede Richtung | beliebig weit orthogonal |
+| 5 | Großer Leuchtturm | 1 Feld in jede Richtung (unabhängig vom Kopf) | nur in Blickrichtung, beliebig weit |
 | B | Schild | 1 Feld in jede Richtung | schlägt nicht |
 | A | Speer | 1 Feld in jede Richtung | 1 Feld in jede Richtung |
 
 Besonderheiten laut [Strakiregeln](https://straki.org/zugregeln/):
 
-- Figur 3 und 5 können **rotieren**. Stehen sie hintereinander mit gleicher Blickrichtung, entsteht eine **Fusion**.
-- Figur B **schützt** die drei Felder vor sich. Nur Figur A darf geschützte Figuren oder B selbst schlagen. Wird B vorn umkreist, fällt sie aus dem Spiel.
+- Figur 3 und 5 können **rotieren**. Der **Zug** ist unabhängig vom Kopf, der **Angriff** geht nur dorthin, wo der Kopf zeigt. Stehen sie hintereinander mit gleicher Blickrichtung, entsteht eine **Fusion**.
+- Figur B **schützt** die drei Felder vor sich. Nur Figur A darf geschützte Figuren oder B selbst schlagen. Wird B von gegnerischen Figuren **umkreist**, verliert sie den Schutz und wird aus dem Spiel entfernt.
 - Ein Angriff auf Figur 5 wird angezeigt. Kann Figur 5 weder fliehen noch gedeckt werden, endet die Partie mit Nullus motus (**1,0 Punkt**).
 - Beide gegnerischen Speere schlagen: **0,5 Punkte**. Beides zusammen: perfekter Sieg **1,5 Punkte**.
 

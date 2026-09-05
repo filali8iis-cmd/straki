@@ -52,18 +52,23 @@ weder fliehen noch sich verteidigen kann.
 Figuren je Seite:
   8× Figur 1 Soldat     ziehen: 1 Feld in jede Richtung; schlagen: 1 Feld vorwärts
   2× Figur 2 Frosch     ziehen: 1 Feld in jede Richtung; schlagen: Sprung 2 diagonal
-  2× Figur 3 kl. Leuchtturm  ziehen: 1 Feld jede Richtung; schlagen: bis 3 orthogonal
+  2× Figur 3 kl. Leuchtturm  ziehen: 1 Feld jede Richtung (unabhängig vom Kopf);
+                               schlagen: nur in Blickrichtung, bis 3 Felder
   2× Figur 4 Schere     ziehen: 1 Feld orthogonal; schlagen: bis 4 diagonal
-  1× Figur 5 gr. Leuchtturm  ziehen: 1 Feld jede Richtung; schlagen: beliebig weit orthogonal
+  1× Figur 5 gr. Leuchtturm  ziehen: 1 Feld jede Richtung (unabhängig vom Kopf);
+                               schlagen: nur in Blickrichtung, beliebig weit
   1× Figur B Schild     ziehen: 1 Feld jede Richtung; schlägt nicht; schützt 3 Felder davor
   2× Figur A Speer      ziehen/schlagen: 1 Feld in jede Richtung; einzig gegen B wirksam
 
 Besonderheiten:
-  • Figur 3 und 5 können rotieren (Blickrichtung). Fusion, wenn beide gleich blicken
-    und eine hinter der anderen steht – die vordere Figur greift in Blickrichtung
-    bis zum Brettrand an.
+  • Figur 3 und 5 können rotieren (Blickrichtung = Kopf). Der Zug ist unabhängig
+    vom Kopf. Angreifen dürfen sie nur dort, wo der Kopf zeigt. Fusion, wenn
+    beide gleich blicken und Figur 5 hinter Figur 3 steht – Figur 3 greift dann
+    in Blickrichtung bis zum Brettrand an.
   • Figur B schützt die drei Felder vor sich. Nur Figur A darf geschützte Figuren
-    oder B selbst schlagen. Wird B vorn umkreist, fällt sie aus dem Spiel.
+    oder B selbst schlagen. Wird B von gegnerischen Figuren umkreist (U-Form
+    aus fünf Feldern, am Rand schließt das Brett), verliert sie den Schutz
+    und wird aus dem Spiel entfernt.
   • Wer Figur 5 angreift, warnt („Angriff auf Figur 5“).
   • Beide gegnerischen Figuren A schlagen: 0,5 Punkte (Aufgabe möglich).
   • Nullus motus: 1,0 Punkte. Beides: perfekter Sieg 1,5 Punkte.

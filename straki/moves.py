@@ -49,11 +49,15 @@ def attack_destinations(board: Board, row: int, col: int) -> list[tuple[int, int
         return _frog_attacks(board, row, col, piece.player)
     if piece.kind is PieceKind.SMALL:
         rng = _fused_range(board, row, col, piece) or SMALL_RANGE
-        return _slide_captures(board, row, col, piece.player, ORTHO_DIRS, rng)
+        return _slide_captures(
+            board, row, col, piece.player, _facing_dirs(piece), rng
+        )
     if piece.kind is PieceKind.SCISSORS:
         return _slide_captures(board, row, col, piece.player, DIAG_DIRS, SCISSORS_RANGE)
     if piece.kind is PieceKind.BIG:
-        return _slide_captures(board, row, col, piece.player, ORTHO_DIRS, BOARD_RANGE)
+        return _slide_captures(
+            board, row, col, piece.player, _facing_dirs(piece), BOARD_RANGE
+        )
     if piece.kind is PieceKind.SPEAR:
         return _adjacent_captures(board, row, col, piece.player, KING_DIRS)
     return []
@@ -85,9 +89,9 @@ def attacked_squares(board: Board, row: int, col: int) -> set[tuple[int, int]]:
         return _slide_squares(board, row, col, DIAG_DIRS, SCISSORS_RANGE)
     if piece.kind is PieceKind.SMALL:
         rng = _fused_range(board, row, col, piece) or SMALL_RANGE
-        return _slide_squares(board, row, col, ORTHO_DIRS, rng)
+        return _slide_squares(board, row, col, _facing_dirs(piece), rng)
     if piece.kind is PieceKind.BIG:
-        return _slide_squares(board, row, col, ORTHO_DIRS, BOARD_RANGE)
+        return _slide_squares(board, row, col, _facing_dirs(piece), BOARD_RANGE)
     return set()
 
 
@@ -134,36 +138,38 @@ def is_protected_by_enemy(board: Board, row: int, col: int, attacker: Player) ->
     return False
 
 
+# U-Form vor dem Schild: zwei Felder seitlich vorn und drei Felder eine Reihe weiter
+# (Beispiel 6: B auf F5 nach Süden → E4, D4, D5, D6, E6).
+_ENCIRCLE_OFFSETS = ((1, -1), (2, -1), (2, 0), (2, 1), (1, 1))
+
+
 def encirclement_squares(board: Board, row: int, col: int) -> set[tuple[int, int]]:
+    """Felder der U-Form in Blickrichtung von Figur B (nur Felder auf dem Brett)."""
     piece = board.get(row, col)
     if piece is None or piece.kind is not PieceKind.SHIELD:
         return set()
     facing = piece.facing or piece.player.forward
-    d_row, d_col = facing.delta
-    offsets = ((1, -1), (2, -1), (2, 0), (2, 1), (1, 1))
-    squares: set[tuple[int, int]] = set()
-    for dist, side in offsets:
-        if d_row != 0:
-            dest = (row + dist * d_row, col + side)
-        else:
-            dest = (row + side, col + dist * d_col)
-        if in_bounds(*dest):
-            squares.add(dest)
-    return squares
+    return {
+        dest
+        for dest in _encircle_slots(row, col, facing)
+        if dest is not None
+    }
 
 
 def shield_is_encircled(board: Board, row: int, col: int) -> bool:
+    """Figur B fällt, wenn gegnerische Figuren sie in der U-Form umkreisen.
+
+    Der Brettrand zählt als geschlossen (Beispiel 7 am Rand). Die U-Form
+    wird in alle vier Richtungen geprüft, weil „umkreist“ nicht nur
+    genau nach vorn gelten muss.
+    """
     piece = board.get(row, col)
     if piece is None or piece.kind is not PieceKind.SHIELD:
         return False
-    needed = encirclement_squares(board, row, col)
-    if len(needed) < 5:
-        return False
-    for n_row, n_col in needed:
-        occupant = board.get(n_row, n_col)
-        if occupant is None or occupant.player is piece.player:
-            return False
-    return True
+    return any(
+        _u_closed_by_enemy(board, row, col, piece.player, facing)
+        for facing in Direction
+    )
 
 
 def fusion_partner(
@@ -247,6 +253,40 @@ def _adjacent_captures(
 
 
 BOARD_RANGE = 11
+
+
+def _facing_dirs(piece: Piece) -> tuple[tuple[int, int], ...]:
+    """Leuchttürme greifen nur in die Richtung, in die der Kopf zeigt."""
+    facing = piece.facing or piece.player.forward
+    return (facing.delta,)
+
+
+def _encircle_slots(
+    row: int, col: int, facing: Direction
+) -> tuple[tuple[int, int] | None, ...]:
+    d_row, d_col = facing.delta
+    slots: list[tuple[int, int] | None] = []
+    for dist, side in _ENCIRCLE_OFFSETS:
+        if d_row != 0:
+            dest = (row + dist * d_row, col + side)
+        else:
+            dest = (row + side, col + dist * d_col)
+        slots.append(dest if in_bounds(*dest) else None)
+    return tuple(slots)
+
+
+def _u_closed_by_enemy(
+    board: Board, row: int, col: int, owner: Player, facing: Direction
+) -> bool:
+    saw_enemy = False
+    for dest in _encircle_slots(row, col, facing):
+        if dest is None:
+            continue
+        occupant = board.get(*dest)
+        if occupant is None or occupant.player is owner:
+            return False
+        saw_enemy = True
+    return saw_enemy
 
 
 def _slide_captures(
