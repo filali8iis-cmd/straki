@@ -88,7 +88,7 @@ class Button:
 
 def run_gui(vs_ai: bool = False) -> None:
     pygame.init()
-    pygame.display.set_caption("STRAKI  –  Figur B zieht auf jedes leere Feld")
+    pygame.display.set_caption("STRAKI 1.5  –  B auf jedes leere Feld")
     screen = pygame.display.set_mode(WINDOW_SIZE)
     clock = pygame.time.Clock()
     fonts = _load_fonts()
@@ -273,17 +273,20 @@ def _draw_board(
             fill = WHITE
             if game.selected == (row, col):
                 fill = SELECT
-            elif (row, col) in protected:
-                fill = PROTECT
             elif (row, col) in quiet:
                 fill = FREE
+            elif (row, col) in protected:
+                fill = PROTECT
             elif last and (row, col) in last:
                 fill = LAST
             pygame.draw.rect(screen, fill, rect)
             pygame.draw.rect(screen, GRID, rect, 1)
             if (row, col) in quiet:
-                radius = 4 if chosen_is_shield else 6
-                pygame.draw.circle(screen, INK, cell_center(row, col), radius)
+                if chosen_is_shield:
+                    inner = rect.inflate(-14, -14)
+                    pygame.draw.rect(screen, (70, 130, 70), inner, 2)
+                else:
+                    pygame.draw.circle(screen, INK, cell_center(row, col), 6)
             if (row, col) in captures:
                 pygame.draw.circle(screen, GRID, cell_center(row, col), CELL // 2 - 8, 3)
 
@@ -298,6 +301,10 @@ def _draw_board(
         _draw_badge(screen, fonts, file_label_center(col - 1), str(col))
         top = (file_label_center(col - 1)[0], BOARD_TOP - LABEL // 2)
         _draw_badge(screen, fonts, top, str(col))
+
+    if chosen_is_shield:
+        hint = fonts["tiny"].render("B gewählt: jedes grüne Feld ist erlaubt.", True, (40, 90, 40))
+        screen.blit(hint, hint.get_rect(midtop=(BOARD_LEFT + BOARD_PIXELS // 2, 6)))
 
 
 def _draw_badge(
