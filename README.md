@@ -4,15 +4,20 @@ Python-Umsetzung des strategischen Brettspiels **STRAKI** von Athanasios Gakis, 
 
 Zwei Spieler bewegen abwechselnd Figuren auf einem **11×11-Brett**. Ziel ist **Nullus motus**: die gegnerische Figur 5 so anzugreifen, dass sie weder fliehen noch sich verteidigen kann.
 
-## Download (Windows)
+## STRAKI.exe herunterladen (Windows)
 
-Die Datei **STRAKI.exe** wird automatisch gebaut. So lädst du sie herunter:
+Fertige Datei, **kein Python** nötig: doppelklicken und spielen.
 
-1. GitHub-Repository öffnen → **Actions**
-2. Workflow **Build STRAKI.exe** wählen
-3. Den neuesten erfolgreichen Lauf öffnen
-4. Artefakt **STRAKI-Windows** herunterladen und entpacken
-5. `STRAKI.exe` doppelklicken – keine Python-Installation nötig
+**[STRAKI.exe herunterladen](https://github.com/filali8iis-cmd/straki/raw/cursor/straki-windows-exe-7437/downloads/STRAKI.exe)**
+
+Dieselbe Datei liegt im Repository unter [`downloads/STRAKI.exe`](https://github.com/filali8iis-cmd/straki/blob/cursor/straki-windows-exe-7437/downloads/STRAKI.exe) (Button **Download raw file**).
+
+Nach dem Merge nach `main` gilt zusätzlich:
+
+- [Release-Download](https://github.com/filali8iis-cmd/straki/releases/latest/download/STRAKI.exe)
+- GitHub → **Actions** → Workflow **Build STRAKI.exe** → Artefakt **STRAKI-Windows**
+
+Windows kann beim ersten Start SmartScreen anzeigen, weil die Datei nicht digital signiert ist: *Weitere Informationen* → *Trotzdem ausführen*.
 
 Lokal selbst bauen (auf einem Windows-PC):
 

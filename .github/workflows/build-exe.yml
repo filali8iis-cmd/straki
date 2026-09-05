@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   windows:
@@ -32,3 +32,18 @@ jobs:
           name: STRAKI-Windows
           path: dist/STRAKI.exe
           if-no-files-found: error
+      - name: GitHub-Release mit Download-Link
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: windows-latest
+          name: STRAKI für Windows
+          files: dist/STRAKI.exe
+          fail_on_unmatched_files: true
+          make_latest: true
+          body: |
+            **STRAKI.exe** herunterladen, entpacken ist nicht nötig.
+
+            Doppelklick startet das Spiel. Python muss nicht installiert sein.
+
+            Windows kann beim ersten Start SmartScreen anzeigen, weil die Datei nicht digital signiert ist: *Weitere Informationen* → *Trotzdem ausführen*.
