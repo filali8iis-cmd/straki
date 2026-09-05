@@ -99,6 +99,33 @@ class RulesTests(unittest.TestCase):
         attacks = attack_destinations(game.board, *parse_square("D5"))
         self.assertEqual(attacks, [parse_square("E5")])
 
+    def test_shield_moves_like_a_king(self) -> None:
+        """Beide Figuren B ziehen ein Feld in jede Richtung, auch seitlich."""
+        game = Game(setup=False)
+        game.turn = Player.RED
+        place(game, "H6", Player.RED, PieceKind.SHIELD, Direction.S)
+        place(game, "I6", Player.RED, PieceKind.BIG, Direction.S)
+        place(game, "F6", Player.BLACK, PieceKind.SOLDIER)
+        place(game, "B6", Player.BLACK, PieceKind.BIG, Direction.N)
+        place(game, "K1", Player.RED, PieceKind.SPEAR)
+        place(game, "K11", Player.RED, PieceKind.SPEAR)
+        place(game, "A1", Player.BLACK, PieceKind.SPEAR)
+        place(game, "A11", Player.BLACK, PieceKind.SPEAR)
+        game.click(*parse_square("H6"))
+        quiet = {m.end for m in game.moves_for_selected() if not m.capture and m.rotate_to is None}
+        self.assertEqual(
+            quiet,
+            {
+                parse_square("G5"),
+                parse_square("G6"),
+                parse_square("G7"),
+                parse_square("H5"),
+                parse_square("H7"),
+                parse_square("I5"),
+                parse_square("I7"),
+            },
+        )
+
     def test_shield_protects_three_squares_ahead(self) -> None:
         game = Game(setup=False)
         place(game, "I6", Player.RED, PieceKind.SHIELD)

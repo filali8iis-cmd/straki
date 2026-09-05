@@ -99,7 +99,7 @@ def attacked_squares(board: Board, row: int, col: int) -> set[tuple[int, int]]:
         squares = _slide_squares(board, row, col, _facing_dirs(piece), BOARD_RANGE)
     else:
         squares = set()
-    squares.update(_figur_5_captures(board, row, col, piece))
+    # Weite Schläge auf Figur 5 zählen nicht als Schach, sonst wird B gefesselt.
     return squares
 
 
