@@ -137,16 +137,39 @@ class RulesTests(unittest.TestCase):
         game.click(*parse_square("E6"))
         self.assertIn(parse_square("F5"), {m.end for m in game.moves_for_selected() if m.capture})
 
-    def test_cannot_capture_figur_5(self) -> None:
+    def test_any_piece_can_capture_figur_5(self) -> None:
         game = Game(setup=False)
         game.turn = Player.RED
         place(game, "E5", Player.RED, PieceKind.SPEAR)
         place(game, "E6", Player.BLACK, PieceKind.BIG, Direction.N)
         place(game, "J6", Player.RED, PieceKind.BIG, Direction.S)
+        place(game, "A1", Player.BLACK, PieceKind.SPEAR)
+        place(game, "A11", Player.BLACK, PieceKind.SPEAR)
         attacks = attack_destinations(game.board, *parse_square("E5"))
         self.assertIn(parse_square("E6"), attacks)
         game.click(*parse_square("E5"))
-        self.assertNotIn(parse_square("E6"), {m.end for m in game.moves_for_selected()})
+        self.assertIn(parse_square("E6"), {m.end for m in game.moves_for_selected() if m.capture})
+        game.click(*parse_square("E6"))
+        self.assertEqual(game.winner, Player.RED)
+        self.assertEqual(game.win_reason, "captured")
+
+    def test_soldier_can_capture_figur_5_along_forward_file(self) -> None:
+        """Stellung wie im Spiel: Soldat D5, Figur 5 auf G5, Bahn frei."""
+        game = Game(setup=False)
+        game.turn = Player.BLACK
+        place(game, "D5", Player.BLACK, PieceKind.SOLDIER)
+        place(game, "G5", Player.RED, PieceKind.BIG, Direction.S)
+        place(game, "B6", Player.BLACK, PieceKind.BIG, Direction.N)
+        place(game, "K1", Player.RED, PieceKind.SPEAR)
+        place(game, "K11", Player.RED, PieceKind.SPEAR)
+        attacks = attack_destinations(game.board, *parse_square("D5"))
+        self.assertIn(parse_square("G5"), attacks)
+        game.click(*parse_square("D5"))
+        self.assertIn(parse_square("G5"), {m.end for m in game.moves_for_selected() if m.capture})
+        game.click(*parse_square("G5"))
+        self.assertEqual(game.board.get(*parse_square("G5")).kind, PieceKind.SOLDIER)
+        self.assertEqual(game.winner, Player.BLACK)
+        self.assertEqual(game.win_reason, "captured")
 
     def test_rotating_lighthouse_changes_attack_line(self) -> None:
         game = Game(setup=False)

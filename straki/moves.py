@@ -43,24 +43,30 @@ def attack_destinations(board: Board, row: int, col: int) -> list[tuple[int, int
     piece = board.get(row, col)
     if piece is None or piece.kind is PieceKind.SHIELD:
         return []
+    dests: list[tuple[int, int]]
     if piece.kind is PieceKind.SOLDIER:
-        return _soldier_attacks(board, row, col, piece)
-    if piece.kind is PieceKind.FROG:
-        return _frog_attacks(board, row, col, piece.player)
-    if piece.kind is PieceKind.SMALL:
+        dests = _soldier_attacks(board, row, col, piece)
+    elif piece.kind is PieceKind.FROG:
+        dests = _frog_attacks(board, row, col, piece.player)
+    elif piece.kind is PieceKind.SMALL:
         rng = _fused_range(board, row, col, piece) or SMALL_RANGE
-        return _slide_captures(
+        dests = _slide_captures(
             board, row, col, piece.player, _facing_dirs(piece), rng
         )
-    if piece.kind is PieceKind.SCISSORS:
-        return _slide_captures(board, row, col, piece.player, DIAG_DIRS, SCISSORS_RANGE)
-    if piece.kind is PieceKind.BIG:
-        return _slide_captures(
+    elif piece.kind is PieceKind.SCISSORS:
+        dests = _slide_captures(board, row, col, piece.player, DIAG_DIRS, SCISSORS_RANGE)
+    elif piece.kind is PieceKind.BIG:
+        dests = _slide_captures(
             board, row, col, piece.player, _facing_dirs(piece), BOARD_RANGE
         )
-    if piece.kind is PieceKind.SPEAR:
-        return _adjacent_captures(board, row, col, piece.player, KING_DIRS)
-    return []
+    elif piece.kind is PieceKind.SPEAR:
+        dests = _adjacent_captures(board, row, col, piece.player, KING_DIRS)
+    else:
+        dests = []
+    for extra in _figur_5_captures(board, row, col, piece):
+        if extra not in dests:
+            dests.append(extra)
+    return dests
 
 
 def attacked_squares(board: Board, row: int, col: int) -> set[tuple[int, int]]:
@@ -71,28 +77,30 @@ def attacked_squares(board: Board, row: int, col: int) -> set[tuple[int, int]]:
     if piece.kind is PieceKind.SOLDIER:
         d_row, d_col = piece.player.forward.delta
         dest = (row + d_row, col + d_col)
-        return {dest} if in_bounds(*dest) else set()
-    if piece.kind is PieceKind.FROG:
-        squares = set()
-        for d_row, d_col in LEAP_DIRS:
-            dest = (row + d_row, col + d_col)
-            if in_bounds(*dest):
-                squares.add(dest)
-        return squares
-    if piece.kind is PieceKind.SPEAR:
-        return {
+        squares = {dest} if in_bounds(*dest) else set()
+    elif piece.kind is PieceKind.FROG:
+        squares = {
+            (row + d_row, col + d_col)
+            for d_row, d_col in LEAP_DIRS
+            if in_bounds(row + d_row, col + d_col)
+        }
+    elif piece.kind is PieceKind.SPEAR:
+        squares = {
             (row + d_row, col + d_col)
             for d_row, d_col in KING_DIRS
             if in_bounds(row + d_row, col + d_col)
         }
-    if piece.kind is PieceKind.SCISSORS:
-        return _slide_squares(board, row, col, DIAG_DIRS, SCISSORS_RANGE)
-    if piece.kind is PieceKind.SMALL:
+    elif piece.kind is PieceKind.SCISSORS:
+        squares = _slide_squares(board, row, col, DIAG_DIRS, SCISSORS_RANGE)
+    elif piece.kind is PieceKind.SMALL:
         rng = _fused_range(board, row, col, piece) or SMALL_RANGE
-        return _slide_squares(board, row, col, _facing_dirs(piece), rng)
-    if piece.kind is PieceKind.BIG:
-        return _slide_squares(board, row, col, _facing_dirs(piece), BOARD_RANGE)
-    return set()
+        squares = _slide_squares(board, row, col, _facing_dirs(piece), rng)
+    elif piece.kind is PieceKind.BIG:
+        squares = _slide_squares(board, row, col, _facing_dirs(piece), BOARD_RANGE)
+    else:
+        squares = set()
+    squares.update(_figur_5_captures(board, row, col, piece))
+    return squares
 
 
 def legal_moves(board: Board, row: int, col: int) -> list[Move]:
@@ -254,6 +262,43 @@ def _adjacent_captures(
 
 
 BOARD_RANGE = 11
+
+
+def _figur_5_dirs(piece: Piece) -> tuple[tuple[int, int], ...]:
+    """Angriffslinien, auf denen jede Figur (außer B) Figur 5 schlagen darf."""
+    if piece.kind is PieceKind.SOLDIER:
+        return (piece.player.forward.delta,)
+    if piece.kind is PieceKind.FROG:
+        return DIAG_DIRS
+    if piece.kind is PieceKind.SMALL or piece.kind is PieceKind.BIG:
+        return _facing_dirs(piece)
+    if piece.kind is PieceKind.SCISSORS:
+        return DIAG_DIRS
+    if piece.kind is PieceKind.SPEAR:
+        return KING_DIRS
+    return ()
+
+
+def _figur_5_captures(
+    board: Board, row: int, col: int, piece: Piece
+) -> list[tuple[int, int]]:
+    """Figur 5 darf von jeder gegnerischen Figur verloren gehen, Linie frei."""
+    dests: list[tuple[int, int]] = []
+    for d_row, d_col in _figur_5_dirs(piece):
+        for step in range(1, BOARD_RANGE + 1):
+            dest = (row + step * d_row, col + step * d_col)
+            if not in_bounds(*dest):
+                break
+            occupant = board.get(*dest)
+            if occupant is None:
+                continue
+            if (
+                occupant.player is not piece.player
+                and occupant.kind is PieceKind.BIG
+            ):
+                dests.append(dest)
+            break
+    return dests
 
 
 def _facing_dirs(piece: Piece) -> tuple[tuple[int, int], ...]:

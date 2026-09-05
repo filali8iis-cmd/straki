@@ -70,6 +70,8 @@ Besonderheiten:
     auf allen vier Seiten oder in der U-Form direkt an B bzw. eine Reihe weiter
     (Beispiel 6/7) – verliert sie den Schutz und wird aus dem Spiel entfernt.
   • Wer Figur 5 angreift, warnt („Angriff auf Figur 5“).
+    Figur 5 kann von jeder gegnerischen Figur (außer B) geschlagen werden,
+    sobald die Angriffslinie frei ist – dann ist die Partie verloren.
   • Beide gegnerischen Figuren A schlagen: 0,5 Punkte (Aufgabe möglich).
   • Nullus motus: 1,0 Punkte. Beides: perfekter Sieg 1,5 Punkte.
 """.strip()

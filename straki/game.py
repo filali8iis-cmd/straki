@@ -129,7 +129,10 @@ class Game:
             self.in_check(opponent) and not self._has_legal_reply(opponent)
         ):
             score = 1.5 if self.both_spears_captured(self.turn) else 1.0
-            reason = "perfect" if score == 1.5 else "nullus"
+            if captured is not None and captured.kind is PieceKind.BIG:
+                reason = "perfect" if score == 1.5 else "captured"
+            else:
+                reason = "perfect" if score == 1.5 else "nullus"
             self._set_winner(self.turn, reason, score)
             if removed_shields:
                 self.message = (
@@ -167,7 +170,7 @@ class Game:
                 if target.player is self.turn:
                     return False
                 if target.kind is PieceKind.BIG:
-                    return False
+                    return True
                 attacker = self.board.get(*move.start)
                 if attacker is None:
                     return False
@@ -210,7 +213,9 @@ class Game:
                 if attacker.kind is not PieceKind.SPEAR:
                     continue
             if (
-                is_protected_by_enemy(self.board, row, col, by_player)
+                target is not None
+                and target.kind is not PieceKind.BIG
+                and is_protected_by_enemy(self.board, row, col, by_player)
                 and attacker.kind is not PieceKind.SPEAR
             ):
                 continue
@@ -231,7 +236,9 @@ class Game:
         self.winner = player
         self.win_reason = reason
         self.score = score
-        if reason == "nullus":
+        if reason == "captured":
+            self.message = f"{player.label_de} gewinnt – Figur 5 wurde geschlagen (1,0 Punkt)!"
+        elif reason == "nullus":
             self.message = f"{player.label_de} gewinnt durch Nullus motus (1,0 Punkt)!"
         elif reason == "perfect":
             self.message = (
