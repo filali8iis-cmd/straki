@@ -35,23 +35,12 @@ class Game:
         dests = {move.end for move in self.moves_for_selected() if move.rotate_to is None}
         if self.selected is not None and (row, col) in dests:
             return self._play(self._move_to(row, col))
-        selected_piece = self.board.get(*self.selected) if self.selected else None
-        if (
-            selected_piece is not None
-            and selected_piece.kind is PieceKind.SHIELD
-            and selected_piece.player is self.turn
-            and self.board.get(row, col) is None
-        ):
-            return self._play(Move(self.selected, (row, col)))
         occupant = self.board.get(row, col)
         if occupant is not None and occupant.player is self.turn:
             self.selected = (row, col)
-            extra = ""
-            if occupant.kind is PieceKind.SHIELD:
-                extra = " Figur B: beliebiges leeres Feld anklicken."
             self.message = (
                 f"{self.turn.label_de} hat {square_name(row, col)} "
-                f"({occupant.kind.name_de}) gewählt.{extra}"
+                f"({occupant.kind.name_de}) gewählt."
             )
             return True
         self.selected = None

@@ -57,7 +57,7 @@ Figuren je Seite:
   2× Figur 4 Schere     ziehen: 1 Feld orthogonal; schlagen: bis 4 diagonal
   1× Figur 5 gr. Leuchtturm  ziehen: 1 Feld jede Richtung (unabhängig vom Kopf);
                                schlagen: nur in Blickrichtung, beliebig weit
-  1× Figur B Schild     ziehen: beliebiges leeres Feld; schlägt nicht; schützt 3 Felder davor
+  1× Figur B Schild     ziehen: 1 Feld orthogonal oder diagonal; schlägt nicht; schützt 3 Felder davor
   2× Figur A Speer      ziehen/schlagen: 1 Feld in jede Richtung; einzig gegen B wirksam
 
 Besonderheiten:

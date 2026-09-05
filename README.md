@@ -56,7 +56,7 @@ Jeder Spieler hat 18 Figuren. Rot steht oben (Reihen I/J), Schwarz unten (Reihen
 | 3 | Kleiner Leuchtturm | 1 Feld in jede Richtung (unabhängig vom Kopf) | nur in Blickrichtung, bis 3 Felder |
 | 4 | Schere | 1 Feld orthogonal | bis 4 Felder diagonal |
 | 5 | Großer Leuchtturm | 1 Feld in jede Richtung (unabhängig vom Kopf) | nur in Blickrichtung, beliebig weit |
-| B | Schild | beliebiges leeres Feld | schlägt nicht |
+| B | Schild | 1 Feld orthogonal oder diagonal | schlägt nicht |
 | A | Speer | 1 Feld in jede Richtung | 1 Feld in jede Richtung |
 
 Besonderheiten laut [Strakiregeln](https://straki.org/zugregeln/):

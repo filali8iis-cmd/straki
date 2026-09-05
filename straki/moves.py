@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from straki.board import Board, in_bounds
 from straki.constants import (
-    BOARD_SIZE,
     DIAG_DIRS,
     KING_DIRS,
     LEAP_DIRS,
@@ -31,15 +30,6 @@ def quiet_destinations(board: Board, row: int, col: int) -> list[tuple[int, int]
     piece = board.get(row, col)
     if piece is None:
         return []
-    if piece.kind is PieceKind.SHIELD:
-        dests = []
-        for dest_row in range(BOARD_SIZE):
-            for dest_col in range(BOARD_SIZE):
-                if (dest_row, dest_col) == (row, col):
-                    continue
-                if board.get(dest_row, dest_col) is None:
-                    dests.append((dest_row, dest_col))
-        return dests
     dirs = ORTHO_DIRS if piece.kind is PieceKind.SCISSORS else KING_DIRS
     dests: list[tuple[int, int]] = []
     for d_row, d_col in dirs:

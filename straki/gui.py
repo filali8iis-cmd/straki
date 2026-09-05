@@ -39,7 +39,6 @@ PANEL = (255, 255, 255)
 SELECT = (255, 231, 168)
 LAST = (248, 215, 212)
 PROTECT = (255, 244, 200)
-FREE = (198, 220, 186)
 CHECK = (196, 69, 54)
 BUTTON = (196, 69, 54)
 BUTTON_HOVER = (150, 40, 32)
@@ -88,7 +87,7 @@ class Button:
 
 def run_gui(vs_ai: bool = False) -> None:
     pygame.init()
-    pygame.display.set_caption("STRAKI 1.5  –  B auf jedes leere Feld")
+    pygame.display.set_caption("STRAKI")
     screen = pygame.display.set_mode(WINDOW_SIZE)
     clock = pygame.time.Clock()
     fonts = _load_fonts()
@@ -256,12 +255,10 @@ def _draw_board(
     quiet = {m.end for m in moves if not m.capture and m.rotate_to is None}
     captures = {m.end for m in moves if m.capture}
     protected: set[tuple[int, int]] = set()
-    chosen_is_shield = False
     if game.selected is not None:
         chosen = game.board.get(*game.selected)
         if chosen is not None and chosen.kind is PieceKind.SHIELD:
             protected = protected_squares(game.board, *game.selected)
-            chosen_is_shield = True
     last = None
     if game.last_move:
         last = (tuple(game.last_move["from"]), tuple(game.last_move["to"]))
@@ -273,8 +270,6 @@ def _draw_board(
             fill = WHITE
             if game.selected == (row, col):
                 fill = SELECT
-            elif (row, col) in quiet:
-                fill = FREE
             elif (row, col) in protected:
                 fill = PROTECT
             elif last and (row, col) in last:
@@ -282,11 +277,7 @@ def _draw_board(
             pygame.draw.rect(screen, fill, rect)
             pygame.draw.rect(screen, GRID, rect, 1)
             if (row, col) in quiet:
-                if chosen_is_shield:
-                    inner = rect.inflate(-14, -14)
-                    pygame.draw.rect(screen, (70, 130, 70), inner, 2)
-                else:
-                    pygame.draw.circle(screen, INK, cell_center(row, col), 6)
+                pygame.draw.circle(screen, INK, cell_center(row, col), 6)
             if (row, col) in captures:
                 pygame.draw.circle(screen, GRID, cell_center(row, col), CELL // 2 - 8, 3)
 
@@ -301,10 +292,6 @@ def _draw_board(
         _draw_badge(screen, fonts, file_label_center(col - 1), str(col))
         top = (file_label_center(col - 1)[0], BOARD_TOP - LABEL // 2)
         _draw_badge(screen, fonts, top, str(col))
-
-    if chosen_is_shield:
-        hint = fonts["tiny"].render("B gewählt: jedes grüne Feld ist erlaubt.", True, (40, 90, 40))
-        screen.blit(hint, hint.get_rect(midtop=(BOARD_LEFT + BOARD_PIXELS // 2, 6)))
 
 
 def _draw_badge(
@@ -360,7 +347,7 @@ def _draw_panel(
         screen.blit(title, (PANEL_LEFT, y))
         y += 40
 
-    subtitle = fonts["tiny"].render("Figur B: jedes leere Feld  ·  straki.org", True, MUTED)
+    subtitle = fonts["tiny"].render("Eigenes Spielfenster  ·  straki.org", True, MUTED)
     screen.blit(subtitle, (PANEL_LEFT, y))
     y += 28
 
