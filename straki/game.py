@@ -38,9 +38,12 @@ class Game:
         occupant = self.board.get(row, col)
         if occupant is not None and occupant.player is self.turn:
             self.selected = (row, col)
+            extra = ""
+            if occupant.kind is PieceKind.SHIELD:
+                extra = " Figur B: beliebiges leeres Feld anklicken."
             self.message = (
                 f"{self.turn.label_de} hat {square_name(row, col)} "
-                f"({occupant.kind.name_de}) gewählt."
+                f"({occupant.kind.name_de}) gewählt.{extra}"
             )
             return True
         self.selected = None
@@ -164,6 +167,14 @@ class Game:
         return None
 
     def _is_legal(self, move: Move) -> bool:
+        mover = self.board.get(*move.start)
+        if (
+            mover is not None
+            and mover.kind is PieceKind.SHIELD
+            and move.rotate_to is None
+            and not move.capture
+        ):
+            return self.board.get(*move.end) is None
         if move.rotate_to is None:
             target = self.board.get(*move.end)
             if target is not None:

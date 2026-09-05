@@ -39,6 +39,7 @@ PANEL = (255, 255, 255)
 SELECT = (255, 231, 168)
 LAST = (248, 215, 212)
 PROTECT = (255, 244, 200)
+FREE = (236, 236, 228)
 CHECK = (196, 69, 54)
 BUTTON = (196, 69, 54)
 BUTTON_HOVER = (150, 40, 32)
@@ -255,10 +256,12 @@ def _draw_board(
     quiet = {m.end for m in moves if not m.capture and m.rotate_to is None}
     captures = {m.end for m in moves if m.capture}
     protected: set[tuple[int, int]] = set()
+    chosen_is_shield = False
     if game.selected is not None:
         chosen = game.board.get(*game.selected)
         if chosen is not None and chosen.kind is PieceKind.SHIELD:
             protected = protected_squares(game.board, *game.selected)
+            chosen_is_shield = True
     last = None
     if game.last_move:
         last = (tuple(game.last_move["from"]), tuple(game.last_move["to"]))
@@ -272,12 +275,15 @@ def _draw_board(
                 fill = SELECT
             elif (row, col) in protected:
                 fill = PROTECT
+            elif (row, col) in quiet:
+                fill = FREE
             elif last and (row, col) in last:
                 fill = LAST
             pygame.draw.rect(screen, fill, rect)
             pygame.draw.rect(screen, GRID, rect, 1)
             if (row, col) in quiet:
-                pygame.draw.circle(screen, INK, cell_center(row, col), 6)
+                radius = 4 if chosen_is_shield else 6
+                pygame.draw.circle(screen, INK, cell_center(row, col), radius)
             if (row, col) in captures:
                 pygame.draw.circle(screen, GRID, cell_center(row, col), CELL // 2 - 8, 3)
 
