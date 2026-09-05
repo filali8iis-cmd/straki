@@ -10,6 +10,7 @@ const filesEl = document.getElementById("files");
 const rotationsEl = document.getElementById("rotations");
 const panel = document.querySelector(".panel");
 
+const game = new Straki.Game();
 let busy = false;
 
 function labels() {
@@ -25,17 +26,6 @@ function labels() {
     span.textContent = String(n);
     filesEl.appendChild(span);
   }
-}
-
-async function api(path, body) {
-  const options = {
-    method: body === undefined ? "GET" : "POST",
-    headers: { "Content-Type": "application/json" },
-  };
-  if (body !== undefined) options.body = JSON.stringify(body);
-  const response = await fetch(path, options);
-  if (!response.ok) throw new Error(`Anfrage fehlgeschlagen: ${response.status}`);
-  return response.json();
 }
 
 function has(list, row, col) {
@@ -86,60 +76,57 @@ function arrow(facing) {
   return { N: "↑", E: "→", S: "↓", W: "←" }[facing] || "";
 }
 
-async function maybeAi(state) {
-  if (!state.vsAi || state.winner || state.turn !== state.aiPlayer) return;
-  busy = true;
-  statusEl.textContent = "Computer denkt …";
-  await new Promise((resolve) => setTimeout(resolve, 250));
-  try {
-    render(await api("/api/ai", {}));
-  } finally {
-    busy = false;
-  }
+function state() {
+  return game.toDict();
 }
 
-async function onCellClick(row, col) {
-  if (busy) return;
-  busy = true;
-  try {
-    const state = await api("/api/click", { row, col });
-    render(state);
-    await maybeAi(state);
-  } finally {
-    busy = false;
+function maybeAi() {
+  const current = state();
+  if (!current.vsAi || current.winner || current.turn !== current.aiPlayer) {
+    render(current);
+    return;
   }
+  busy = true;
+  statusEl.textContent = "Computer denkt …";
+  window.setTimeout(() => {
+    try {
+      const move = Straki.chooseTurn(game);
+      if (move) game.applyTurn(move);
+      render(state());
+    } finally {
+      busy = false;
+    }
+  }, 180);
+}
+
+function onCellClick(row, col) {
+  if (busy) return;
+  game.click(row, col);
+  maybeAi();
 }
 
 rotationsEl.querySelectorAll("button").forEach((button) => {
-  button.addEventListener("click", async () => {
+  button.addEventListener("click", () => {
     if (busy) return;
-    const state = await api("/api/rotate", { direction: button.dataset.dir });
-    render(state);
-    await maybeAi(state);
+    game.rotate(button.dataset.dir);
+    maybeAi();
   });
 });
 
-endHalfBtn.addEventListener("click", async () => {
-  const state = await api("/api/half", {});
-  render(state);
+endHalfBtn.addEventListener("click", () => {
+  game.claimHalfWin();
+  render(state());
 });
 
-newGameBtn.addEventListener("click", async () => {
-  const state = await api("/api/new", { vsAi: vsAiEl.checked });
-  render(state);
-  await maybeAi(state);
+newGameBtn.addEventListener("click", () => {
+  game.reset(vsAiEl.checked);
+  maybeAi();
 });
 
-vsAiEl.addEventListener("change", async () => {
-  const state = await api("/api/new", { vsAi: vsAiEl.checked });
-  render(state);
-  await maybeAi(state);
+vsAiEl.addEventListener("change", () => {
+  game.reset(vsAiEl.checked);
+  maybeAi();
 });
 
 labels();
-api("/api/state").then(async (state) => {
-  render(state);
-  await maybeAi(state);
-}).catch((error) => {
-  statusEl.textContent = error.message;
-});
+render(state());

@@ -2,15 +2,18 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>STRAKI – Strategy board game</title>
-  <link rel="stylesheet" href="/style.css" />
-  <link rel="icon" href="/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#c44536" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>STRAKI</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="logo.png" />
 </head>
 <body>
   <div class="app">
     <header class="hero">
-      <img class="logo" src="/logo.png" alt="STRAKI" />
+      <img class="logo" src="logo.png" alt="STRAKI" />
       <p class="tagline">Strategisches Brettspiel nach den Regeln von <a href="https://straki.org" target="_blank" rel="noreferrer">straki.org</a></p>
     </header>
 
@@ -53,7 +56,7 @@
           </label>
         </div>
 
-        <details class="rules" open>
+        <details class="rules">
           <summary>Ziel und Regeln</summary>
           <p>Gewinne, indem du die gegnerische Figur 5 schlägst (jede Figur außer B darf das, Linie frei) oder durch <strong>Nullus motus</strong>.</p>
           <p>Ziehen und Schlagen sind getrennt. Figur 3 und 5 ziehen unabhängig vom Kopf, greifen aber nur in Blickrichtung an. Figur B zieht ein Feld orthogonal oder diagonal und schützt drei Felder vor sich; wird sie umkreist, fällt sie aus dem Spiel. Nur der Speer (A) durchbricht den Schutz.</p>
@@ -62,6 +65,7 @@
       </aside>
     </main>
   </div>
-  <script src="/game.js"></script>
+  <script src="engine.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>

@@ -15,9 +15,13 @@ html, body {
   background: radial-gradient(circle at top, #fff 0%, var(--bg) 55%);
   color: var(--ink);
   font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
 }
 
-body { padding: 16px 12px 40px; }
+body {
+  padding: max(12px, env(safe-area-inset-top)) 12px max(28px, env(safe-area-inset-bottom));
+  touch-action: manipulation;
+}
 
 .app { max-width: 1180px; margin: 0 auto; }
 
@@ -203,4 +207,7 @@ body { padding: 16px 12px 40px; }
 
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
+  .board-wrap { padding: 10px 10px 8px 4px; }
+  .rotations button { width: 44px; height: 44px; }
+  .btn { padding: 14px; }
 }

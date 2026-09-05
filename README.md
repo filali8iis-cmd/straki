@@ -28,6 +28,22 @@ python scripts/build_exe.py
 
 Die fertige Datei liegt dann in `dist/STRAKI.exe`.
 
+## Android / Google Play
+
+Die Windows-EXE läuft nicht auf dem Handy. Für Android gibt es eine eigene App:
+
+- **[STRAKI.apk](https://github.com/filali8iis-cmd/straki/raw/cursor/straki-android-apk-7437/downloads/STRAKI.apk)** – auf dem eigenen Gerät installieren und testen
+- **[STRAKI.aab](https://github.com/filali8iis-cmd/straki/raw/cursor/straki-android-apk-7437/downloads/STRAKI.aab)** – diese Datei bei **Google Play** hochladen
+
+Paketname: `org.straki.android`. Anleitung: [docs/PLAY_STORE.de.md](docs/PLAY_STORE.de.md).
+
+Lokal bauen (Android SDK + JDK 21):
+
+```bash
+npm install
+bash scripts/build_apk.sh
+```
+
 ## Start mit Python
 
 ```bash

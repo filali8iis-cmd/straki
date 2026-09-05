@@ -1,0 +1,23 @@
+{
+  "name": "straki",
+  "version": "1.0.0",
+  "private": true,
+  "description": "STRAKI – strategisches Brettspiel für Windows und Android",
+  "scripts": {
+    "test": "python3 -m unittest discover -s tests -v && node tests/test_engine.js",
+    "build:android": "bash scripts/build_apk.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/filali8iis-cmd/straki.git"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/app": "^7.1.0",
+    "@capacitor/core": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3"
+  }
+}
