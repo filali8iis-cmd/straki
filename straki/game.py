@@ -164,17 +164,8 @@ class Game:
         return None
 
     def _is_playable(self, move: Move) -> bool:
-        """Zug nach Figurenregeln. Nur Figur 5 darf nicht ins Schach laufen."""
-        if not self._follows_piece_rules(move):
-            return False
-        mover = self.board.get(*move.start)
-        if mover is None or mover.kind is not PieceKind.BIG:
-            return True
-        if move.rotate_to is None:
-            target = self.board.get(*move.end)
-            if target is not None and target.kind is PieceKind.BIG:
-                return True
-        return self._escapes_check(move)
+        """Zug nach Figurenregeln. Figur 5 zieht ein Feld in jede Richtung."""
+        return self._follows_piece_rules(move)
 
     def _follows_piece_rules(self, move: Move) -> bool:
         if move.rotate_to is not None:

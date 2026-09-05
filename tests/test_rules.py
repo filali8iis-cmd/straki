@@ -25,6 +25,29 @@ def kings(game: Game) -> None:
 
 
 class RulesTests(unittest.TestCase):
+    def test_figur_5_steps_forward_on_attacked_file(self) -> None:
+        """Figur 5 auf H6 darf nach G6, auch wenn die gegnerische 5 die Linie 6 hält."""
+        game = Game(setup=False)
+        game.turn = Player.RED
+        place(game, "H6", Player.RED, PieceKind.BIG, Direction.S)
+        place(game, "H5", Player.RED, PieceKind.SHIELD, Direction.S)
+        place(game, "H7", Player.RED, PieceKind.SOLDIER)
+        place(game, "B6", Player.BLACK, PieceKind.BIG, Direction.N)
+        place(game, "A2", Player.RED, PieceKind.SPEAR)
+        place(game, "A10", Player.RED, PieceKind.SPEAR)
+        place(game, "K2", Player.BLACK, PieceKind.SPEAR)
+        place(game, "K10", Player.BLACK, PieceKind.SPEAR)
+        self.assertTrue(game.in_check(Player.RED))
+        game.click(*parse_square("H6"))
+        quiet = {m.end for m in game.moves_for_selected() if not m.capture and m.rotate_to is None}
+        self.assertIn(parse_square("G6"), quiet)
+        self.assertIn(parse_square("G5"), quiet)
+        self.assertIn(parse_square("G7"), quiet)
+        self.assertTrue(game.click(*parse_square("G6")))
+        self.assertEqual(game.board.get(*parse_square("G6")).kind, PieceKind.BIG)
+        self.assertIsNone(game.board.get(*parse_square("H6")))
+        self.assertIs(game.turn, Player.BLACK)
+
     def test_soldier_keeps_all_steps_when_figur_5_is_attacked(self) -> None:
         """Soldat zieht weiter ein Feld in jede Richtung, auch bei Angriff auf 5."""
         game = Game()
