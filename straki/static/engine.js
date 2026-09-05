@@ -521,14 +521,7 @@
     }
 
     _isPlayable(move) {
-      if (!this._followsPieceRules(move)) return false;
-      const mover = get(this.board, ...move.start);
-      if (!mover || mover.kind !== "5") return true;
-      if (!move.rotateTo) {
-        const target = get(this.board, ...move.end);
-        if (target && target.kind === "5") return true;
-      }
-      return this._escapesCheck(move);
+      return this._followsPieceRules(move);
     }
 
     _followsPieceRules(move) {

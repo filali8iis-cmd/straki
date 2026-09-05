@@ -17,6 +17,25 @@ function ends(game) {
 }
 
 const tests = {
+  figur5ForwardOnFile() {
+    const game = new Game(false, false);
+    game.turn = "red";
+    place(game, "H6", "red", "5", "S");
+    place(game, "H5", "red", "B", "S");
+    place(game, "H7", "red", "1");
+    place(game, "B6", "black", "5", "N");
+    place(game, "A2", "red", "A");
+    place(game, "A10", "red", "A");
+    place(game, "K2", "black", "A");
+    place(game, "K10", "black", "A");
+    assert(game.inCheck("red"));
+    game.click(...parseSquare("H6"));
+    const quiet = new Set(game.movesForSelected().filter((m) => !m.capture && !m.rotateTo).map((m) => m.end.join(",")));
+    assert(quiet.has(parseSquare("G6").join(",")));
+    assert(game.click(...parseSquare("G6")));
+    assert.strictEqual(game.board[parseSquare("G6")[0]][parseSquare("G6")[1]].kind, "5");
+    assert.strictEqual(game.turn, "black");
+  },
   openingSoldier() {
     const game = new Game();
     game.click(...parseSquare("I5"));
