@@ -39,7 +39,7 @@ PANEL = (255, 255, 255)
 SELECT = (255, 231, 168)
 LAST = (248, 215, 212)
 PROTECT = (255, 244, 200)
-FREE = (236, 236, 228)
+FREE = (198, 220, 186)
 CHECK = (196, 69, 54)
 BUTTON = (196, 69, 54)
 BUTTON_HOVER = (150, 40, 32)
@@ -88,7 +88,7 @@ class Button:
 
 def run_gui(vs_ai: bool = False) -> None:
     pygame.init()
-    pygame.display.set_caption("STRAKI")
+    pygame.display.set_caption("STRAKI  –  Figur B zieht auf jedes leere Feld")
     screen = pygame.display.set_mode(WINDOW_SIZE)
     clock = pygame.time.Clock()
     fonts = _load_fonts()
@@ -353,7 +353,7 @@ def _draw_panel(
         screen.blit(title, (PANEL_LEFT, y))
         y += 40
 
-    subtitle = fonts["tiny"].render("Eigenes Spielfenster  ·  straki.org", True, MUTED)
+    subtitle = fonts["tiny"].render("Figur B: jedes leere Feld  ·  straki.org", True, MUTED)
     screen.blit(subtitle, (PANEL_LEFT, y))
     y += 28
 

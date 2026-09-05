@@ -120,6 +120,11 @@ class RulesTests(unittest.TestCase):
         self.assertIsNotNone(game.board.get(*parse_square("A1")))
         self.assertEqual(game.board.get(*parse_square("A1")).kind, PieceKind.SHIELD)
         self.assertIsNone(game.board.get(*parse_square("H6")))
+        game.turn = Player.RED
+        game.click(*parse_square("A1"))
+        game.click(*parse_square("K5"))
+        self.assertEqual(game.board.get(*parse_square("K5")).kind, PieceKind.SHIELD)
+        self.assertIsNone(game.board.get(*parse_square("A1")))
 
     def test_shield_protects_three_squares_ahead(self) -> None:
         game = Game(setup=False)
