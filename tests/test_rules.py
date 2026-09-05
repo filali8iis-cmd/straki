@@ -25,6 +25,31 @@ def kings(game: Game) -> None:
 
 
 class RulesTests(unittest.TestCase):
+    def test_soldier_keeps_all_steps_when_figur_5_is_attacked(self) -> None:
+        """Soldat zieht weiter ein Feld in jede Richtung, auch bei Angriff auf 5."""
+        game = Game()
+        game.board.set(*parse_square("I6"), None)
+        game.board.set(*parse_square("C6"), None)
+        place(game, "G8", Player.RED, PieceKind.SHIELD, Direction.S)
+        place(game, "E4", Player.BLACK, PieceKind.SHIELD, Direction.N)
+        game.turn = Player.RED
+        self.assertTrue(game.in_check(Player.RED))
+        game.click(*parse_square("I7"))
+        quiet = {m.end for m in game.moves_for_selected() if not m.capture and m.rotate_to is None}
+        self.assertEqual(
+            quiet,
+            {
+                parse_square("H6"),
+                parse_square("H7"),
+                parse_square("H8"),
+                parse_square("I6"),
+            },
+        )
+        self.assertTrue(game.click(*parse_square("H7")))
+        self.assertEqual(game.board.get(*parse_square("H7")).kind, PieceKind.SOLDIER)
+        self.assertIsNone(game.board.get(*parse_square("I7")))
+        self.assertIs(game.turn, Player.BLACK)
+
     def test_opening_soldier_moves(self) -> None:
         game = Game()
         game.click(*parse_square("I5"))

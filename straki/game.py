@@ -91,7 +91,7 @@ class Game:
         return [
             move
             for move in raw_legal_moves(self.board, row, col)
-            if self._is_legal(move)
+            if self._is_playable(move)
         ]
 
     def all_legal_moves(self) -> list[Move]:
@@ -163,32 +163,42 @@ class Game:
                 return move
         return None
 
-    def _is_legal(self, move: Move) -> bool:
+    def _is_playable(self, move: Move) -> bool:
+        """Zug nach Figurenregeln. Nur Figur 5 darf nicht ins Schach laufen."""
+        if not self._follows_piece_rules(move):
+            return False
         mover = self.board.get(*move.start)
-        if (
-            mover is not None
-            and mover.kind is PieceKind.SHIELD
-            and move.rotate_to is None
-            and not move.capture
-        ):
-            return self.board.get(*move.end) is None
+        if mover is None or mover.kind is not PieceKind.BIG:
+            return True
         if move.rotate_to is None:
             target = self.board.get(*move.end)
-            if target is not None:
-                if target.player is self.turn:
-                    return False
-                if target.kind is PieceKind.BIG:
-                    return True
-                attacker = self.board.get(*move.start)
-                if attacker is None:
-                    return False
-                if target.kind is PieceKind.SHIELD and attacker.kind is not PieceKind.SPEAR:
-                    return False
-                if (
-                    is_protected_by_enemy(self.board, *move.end, self.turn)
-                    and attacker.kind is not PieceKind.SPEAR
-                ):
-                    return False
+            if target is not None and target.kind is PieceKind.BIG:
+                return True
+        return self._escapes_check(move)
+
+    def _follows_piece_rules(self, move: Move) -> bool:
+        if move.rotate_to is not None:
+            return True
+        target = self.board.get(*move.end)
+        if target is None:
+            return True
+        if target.player is self.turn:
+            return False
+        if target.kind is PieceKind.BIG:
+            return True
+        attacker = self.board.get(*move.start)
+        if attacker is None:
+            return False
+        if target.kind is PieceKind.SHIELD and attacker.kind is not PieceKind.SPEAR:
+            return False
+        if (
+            is_protected_by_enemy(self.board, *move.end, self.turn)
+            and attacker.kind is not PieceKind.SPEAR
+        ):
+            return False
+        return True
+
+    def _escapes_check(self, move: Move) -> bool:
         clone = self.board.copy()
         apply_move(clone, move)
         probe = Game(setup=False)
@@ -200,7 +210,10 @@ class Game:
         saved_turn = self.turn
         self.turn = player
         try:
-            return any(self._is_legal(move) for move in self._raw_moves(player))
+            return any(
+                self._follows_piece_rules(move) and self._escapes_check(move)
+                for move in self._raw_moves(player)
+            )
         finally:
             self.turn = saved_turn
 
