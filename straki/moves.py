@@ -138,9 +138,11 @@ def is_protected_by_enemy(board: Board, row: int, col: int, attacker: Player) ->
     return False
 
 
-# U-Form vor dem Schild: zwei Felder seitlich vorn und drei Felder eine Reihe weiter
-# (Beispiel 6: B auf F5 nach Süden → E4, D4, D5, D6, E6).
-_ENCIRCLE_OFFSETS = ((1, -1), (2, -1), (2, 0), (2, 1), (1, 1))
+# U-Form eine Reihe weiter vorn (Beispiel 6: B auf F5 nach Süden → E4, D4, D5, D6, E6).
+_FAR_U_OFFSETS = ((1, -1), (2, -1), (2, 0), (2, 1), (1, 1))
+# U-Form direkt an B: beide Seiten plus drei Felder auf einer Seite
+# (B auf F6 nach Norden → F5, G5, G6, G7, F7).
+_CLOSE_U_OFFSETS = ((0, -1), (1, -1), (1, 0), (1, 1), (0, 1))
 
 
 def encirclement_squares(board: Board, row: int, col: int) -> set[tuple[int, int]]:
@@ -151,27 +153,24 @@ def encirclement_squares(board: Board, row: int, col: int) -> set[tuple[int, int
     facing = piece.facing or piece.player.forward
     return {
         dest
-        for dest in _encircle_slots(row, col, facing)
+        for dest in _encircle_slots(row, col, facing, _FAR_U_OFFSETS)
         if dest is not None
     }
 
 
 def shield_is_encircled(board: Board, row: int, col: int) -> bool:
-    """Figur B fällt, wenn gegnerische Figuren sie umkreisen.
-
-    Zwei Muster zählen:
-    - die offizielle U-Form (Beispiel 6/7), auch über den Brettrand
-    - alle vier orthogonalen Nachbarfelder durch Gegner oder Rand belegt
-    """
+    """Figur B fällt, wenn gegnerische Figuren sie umkreisen."""
     piece = board.get(row, col)
     if piece is None or piece.kind is not PieceKind.SHIELD:
         return False
     if _orthogonally_boxed(board, row, col, piece.player):
         return True
-    return any(
-        _u_closed_by_enemy(board, row, col, piece.player, facing)
-        for facing in Direction
-    )
+    for facing in Direction:
+        if _u_closed_by_enemy(board, row, col, piece.player, facing, _CLOSE_U_OFFSETS):
+            return True
+        if _u_closed_by_enemy(board, row, col, piece.player, facing, _FAR_U_OFFSETS):
+            return True
+    return False
 
 
 def fusion_partner(
@@ -264,11 +263,14 @@ def _facing_dirs(piece: Piece) -> tuple[tuple[int, int], ...]:
 
 
 def _encircle_slots(
-    row: int, col: int, facing: Direction
+    row: int,
+    col: int,
+    facing: Direction,
+    offsets: tuple[tuple[int, int], ...],
 ) -> tuple[tuple[int, int] | None, ...]:
     d_row, d_col = facing.delta
     slots: list[tuple[int, int] | None] = []
-    for dist, side in _ENCIRCLE_OFFSETS:
+    for dist, side in offsets:
         if d_row != 0:
             dest = (row + dist * d_row, col + side)
         else:
@@ -292,10 +294,15 @@ def _orthogonally_boxed(board: Board, row: int, col: int, owner: Player) -> bool
 
 
 def _u_closed_by_enemy(
-    board: Board, row: int, col: int, owner: Player, facing: Direction
+    board: Board,
+    row: int,
+    col: int,
+    owner: Player,
+    facing: Direction,
+    offsets: tuple[tuple[int, int], ...],
 ) -> bool:
     saw_enemy = False
-    for dest in _encircle_slots(row, col, facing):
+    for dest in _encircle_slots(row, col, facing, offsets):
         if dest is None:
             continue
         occupant = board.get(*dest)
