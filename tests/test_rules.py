@@ -208,6 +208,24 @@ class RulesTests(unittest.TestCase):
         game.click(*parse_square("B1"))
         self.assertIsNone(game.board.get(*parse_square("B9")))
 
+    def test_orthogonally_surrounded_shield_is_removed(self) -> None:
+        """B auf F8, Gegner auf E8/G8/F7/F9: direkt umkreist, muss fallen."""
+        game = Game(setup=False)
+        game.turn = Player.RED
+        place(game, "F8", Player.BLACK, PieceKind.SHIELD, Direction.N)
+        place(game, "G8", Player.RED, PieceKind.SOLDIER)
+        place(game, "E8", Player.RED, PieceKind.SCISSORS)
+        place(game, "F7", Player.RED, PieceKind.SOLDIER)
+        place(game, "F9", Player.RED, PieceKind.SOLDIER)
+        place(game, "C1", Player.RED, PieceKind.SOLDIER)
+        place(game, "C2", Player.BLACK, PieceKind.SOLDIER)
+        kings(game)
+        self.assertTrue(shield_is_encircled(game.board, *parse_square("F8")))
+        game.click(*parse_square("C1"))
+        game.click(*parse_square("B1"))
+        self.assertIsNone(game.board.get(*parse_square("F8")))
+        self.assertIn("umkreist", game.message)
+
     def test_opening_shields_are_not_encircled(self) -> None:
         game = Game()
         self.assertFalse(shield_is_encircled(game.board, *parse_square("I6")))

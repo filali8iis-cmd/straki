@@ -157,15 +157,17 @@ def encirclement_squares(board: Board, row: int, col: int) -> set[tuple[int, int
 
 
 def shield_is_encircled(board: Board, row: int, col: int) -> bool:
-    """Figur B fällt, wenn gegnerische Figuren sie in der U-Form umkreisen.
+    """Figur B fällt, wenn gegnerische Figuren sie umkreisen.
 
-    Der Brettrand zählt als geschlossen (Beispiel 7 am Rand). Die U-Form
-    wird in alle vier Richtungen geprüft, weil „umkreist“ nicht nur
-    genau nach vorn gelten muss.
+    Zwei Muster zählen:
+    - die offizielle U-Form (Beispiel 6/7), auch über den Brettrand
+    - alle vier orthogonalen Nachbarfelder durch Gegner oder Rand belegt
     """
     piece = board.get(row, col)
     if piece is None or piece.kind is not PieceKind.SHIELD:
         return False
+    if _orthogonally_boxed(board, row, col, piece.player):
+        return True
     return any(
         _u_closed_by_enemy(board, row, col, piece.player, facing)
         for facing in Direction
@@ -273,6 +275,20 @@ def _encircle_slots(
             dest = (row + side, col + dist * d_col)
         slots.append(dest if in_bounds(*dest) else None)
     return tuple(slots)
+
+
+def _orthogonally_boxed(board: Board, row: int, col: int, owner: Player) -> bool:
+    """B ist orthogonal umkreist: jedes Nachbarfeld Gegner oder außerhalb."""
+    saw_enemy = False
+    for d_row, d_col in ORTHO_DIRS:
+        dest = (row + d_row, col + d_col)
+        if not in_bounds(*dest):
+            continue
+        occupant = board.get(*dest)
+        if occupant is None or occupant.player is owner:
+            return False
+        saw_enemy = True
+    return saw_enemy
 
 
 def _u_closed_by_enemy(

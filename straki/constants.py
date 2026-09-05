@@ -66,9 +66,9 @@ Besonderheiten:
     beide gleich blicken und Figur 5 hinter Figur 3 steht – Figur 3 greift dann
     in Blickrichtung bis zum Brettrand an.
   • Figur B schützt die drei Felder vor sich. Nur Figur A darf geschützte Figuren
-    oder B selbst schlagen. Wird B von gegnerischen Figuren umkreist (U-Form
-    aus fünf Feldern, am Rand schließt das Brett), verliert sie den Schutz
-    und wird aus dem Spiel entfernt.
+    oder B selbst schlagen. Wird B von gegnerischen Figuren umkreist – entweder
+    orthogonal auf allen vier Seiten oder in der U-Form (Beispiel 6/7) – verliert
+    sie den Schutz und wird aus dem Spiel entfernt.
   • Wer Figur 5 angreift, warnt („Angriff auf Figur 5“).
   • Beide gegnerischen Figuren A schlagen: 0,5 Punkte (Aufgabe möglich).
   • Nullus motus: 1,0 Punkte. Beides: perfekter Sieg 1,5 Punkte.
